@@ -79,3 +79,53 @@ The theming of this desktop environment is designed to be consistent and visuall
 ![Representation 2](screenshots/representation2.png)
 
 
+
+## Omarchy
+
+My current setup runs on [Omarchy](https://omarchy.org/). Its config lives in the
+`omarchy/` and `omarchy-desktop/` [GNU Stow](https://www.gnu.org/software/stow/) package, which mirrors
+`$HOME`. Only user overrides are tracked (`~/.config/hypr`, `~/.config/omarchy`,
+terminals, nvim, wireplumber, voxtype, user systemd units, `~/.local/bin` scripts);
+Omarchy's own defaults in `/usr/share/omarchy` are never copied.
+
+> The `install.sh` and top-level folders above are for the old vanilla Arch setup.
+> Don't run `install.sh` on Omarchy.
+
+### Install on a fresh Omarchy machine
+
+```bash
+git clone https://github.com/eynort/dotfiles.git ~/Downloads/dotfiles
+~/Downloads/dotfiles/omarchy-install.sh            # laptop / any machine
+~/Downloads/dotfiles/omarchy-install.sh --desktop  # + desktop monitor config
+```
+
+Wherever it was cloned, the script first moves the repo to `~/dotfiles` (the symlinks point there), installs the
+packages in `omarchy-packages.txt` plus Steam and Voxtype through Omarchy's own
+installers, links the config with `stow --no-folding`, enables the user services and
+applies the theme. It is safe to re-run.
+
+`omarchy-desktop/` holds config that only fits the desktop (monitor resolution and
+scaling); laptops keep Omarchy's auto-detected `monitors.lua`.
+
+What it can't bring over: logins (GitHub, browsers, AI CLIs), files in `~/Documents`
+or `~/Videos` (e.g. the live wallpaper video), and BIOS/hardware settings.
+
+### Day to day
+
+Files in `$HOME` are symlinks into this repo, so editing them edits the repo. Some
+Omarchy commands (moving bar widgets, changing text size or monitor scaling) rewrite
+their file in place, which turns the symlink back into a plain file. `sync.sh` pulls
+those files back into the repo and relinks them, so run it before every commit:
+
+```bash
+cd ~/dotfiles
+./sync.sh        # adopt changes made by Omarchy, then review with git diff
+git add -A && git commit -m "..." && git push
+```
+
+- **New config file**: move it into `omarchy/` at the same path, then run `./sync.sh`.
+- **After `omarchy refresh <x>`**: `./sync.sh` brings the fresh default into the repo;
+  `git diff` shows it, and `git checkout -- <file>` restores your version.
+
+Not tracked on purpose: `factory.dashboard` (it links to another project), anything with
+credentials (`gh`, `git`, browsers, AI CLIs), and the `.bak.*` backups.

@@ -1,0 +1,12 @@
+[Unit]
+Description=Notify when systemd-oomd kills something
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+ExecStart=%h/.local/bin/oomd-notify
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

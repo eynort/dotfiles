@@ -1,0 +1,61 @@
+#!/bin/bash
+# Switch the G435 Bluetooth headset between music (A2DP, high quality, no mic)
+# and call (HFP, headset mic, 16 kHz mono) profiles.
+#
+#   g435-mode toggle | music | call | status (Waybar-style JSON for the bar)
+
+CARD_MATCH="G435"
+CALL_PROFILE="headset-head-unit"
+MUSIC_PROFILE="a2dp-sink"
+
+card() {
+  pactl list cards | awk -v m="$CARD_MATCH" '
+    /^\tName: / { name = $2 }
+    /device.description = / && index($0, m) { print name; exit }'
+}
+
+profile() {
+  pactl list cards | awk -v c="$1" '
+    /^\tName: / { hit = ($2 == c) }
+    hit && /Active Profile:/ { print $3; exit }'
+}
+
+set_mode() {
+  local c=$1 target=$2
+  pactl set-card-profile "$c" "$target" || return 1
+  if [[ $target == "$CALL_PROFILE" ]]; then
+    # Wait for the headset mic to appear and make it the default input
+    local src
+    for _ in {1..30}; do
+      src=$(pactl list short sources | awk '$2 ~ /^bluez_input\./ { print $2; exit }')
+      [[ -n $src ]] && break
+      sleep 0.1
+    done
+    [[ -n $src ]] && pactl set-default-source "$src"
+  fi
+}
+
+c=$(card)
+
+case ${1:-status} in
+  status)
+    if [[ -z $c ]]; then
+      printf '{"text":"","tooltip":"","class":""}\n'
+    elif [[ $(profile "$c") == headset-head-unit* ]]; then
+      printf '{"text":"󰋎","tooltip":"G435: modo llamada (micrófono activo, 16 kHz)\\nClic para volver a música","class":"active"}\n'
+    else
+      printf '{"text":"󰋋","tooltip":"G435: modo música (alta calidad, sin micrófono)\\nClic para modo llamada","class":""}\n'
+    fi
+    ;;
+  call)  [[ -n $c ]] && set_mode "$c" "$CALL_PROFILE" ;;
+  music) [[ -n $c ]] && set_mode "$c" "$MUSIC_PROFILE" ;;
+  toggle)
+    [[ -z $c ]] && { notify-send -u low "G435" "Audífonos no conectados"; exit 1; }
+    if [[ $(profile "$c") == headset-head-unit* ]]; then
+      set_mode "$c" "$MUSIC_PROFILE"
+    else
+      set_mode "$c" "$CALL_PROFILE"
+    fi
+    ;;
+  *) echo "usage: g435-mode [toggle|music|call|status]" >&2; exit 2 ;;
+esac

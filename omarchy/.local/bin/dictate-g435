@@ -1,0 +1,21 @@
+#!/bin/bash
+# Toggle voxtype dictation, switching the G435 into call mode (headset mic)
+# while recording and back to music mode afterwards.
+
+flag="${XDG_RUNTIME_DIR:-/tmp}/dictate-g435-switched"
+mode=~/.local/bin/g435-mode
+
+if [[ $(voxtype status 2>/dev/null) == recording ]]; then
+  voxtype record stop
+  if [[ -e $flag ]]; then
+    rm -f "$flag"
+    sleep 0.3
+    "$mode" music
+  fi
+else
+  # Only switch back later if we were the ones who switched to call mode
+  if [[ $("$mode" status) != *'"class":"active"'* ]] && "$mode" call; then
+    touch "$flag"
+  fi
+  voxtype record start
+fi

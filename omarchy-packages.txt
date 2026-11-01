@@ -1,0 +1,24 @@
+# Packages installed on top of a stock Omarchy install.
+# Format: one package per line. Prefix with "aur:" for AUR packages.
+# Things Omarchy has its own installer for (Steam, Voxtype) live in omarchy-install.sh.
+
+blender
+claude-desktop
+cmake
+dotnet-sdk
+gamescope
+godot-mono
+jre17-openjdk
+meson
+nmap
+proton-vpn-gtk-app
+spirv-headers
+tor
+torbrowser-launcher
+virtualbox
+virtualbox-host-dkms
+vulkan-headers
+xorg-server-xvfb
+
+aur:codex-desktop-git
+aur:mpvpaper

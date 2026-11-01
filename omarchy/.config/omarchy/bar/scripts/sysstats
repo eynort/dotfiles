@@ -1,0 +1,66 @@
+#!/bin/bash
+# Bar module: CPU/GPU temperature + usage and RAM usage (Waybar-style JSON).
+
+# Alert thresholds in °C: at or above these, a fire icon appears next to the
+# temperature and the module is highlighted with the accent color.
+CPU_TEMP_ALERT=90
+GPU_TEMP_ALERT=85
+FIRE=$'\U000f0238'
+
+hwmon() {
+  for d in /sys/class/hwmon/hwmon*; do
+    [[ $(<"$d/name") == "$1" ]] && { echo "$d"; return; }
+  done
+}
+
+temp() { [[ -r $1 ]] && echo $(( ($(<"$1") + 500) / 1000 )) || echo "?"; }
+
+# CPU usage (delta since previous run)
+state="${XDG_RUNTIME_DIR:-/tmp}/bar-sysstats-cpu"
+read -r _ user nice system idle iowait irq softirq steal _ < /proc/stat
+total=$((user + nice + system + idle + iowait + irq + softirq + steal))
+busy=$((total - idle - iowait))
+cpu_use=0
+if [[ -r $state ]]; then
+  read -r ptotal pbusy < "$state"
+  dt=$((total - ptotal))
+  (( dt > 0 )) && cpu_use=$(( (100 * (busy - pbusy) + dt / 2) / dt ))
+fi
+echo "$total $busy" > "$state"
+
+cpu_mon=$(hwmon k10temp); [[ -z $cpu_mon ]] && cpu_mon=$(hwmon coretemp)
+cpu_temp=$(temp "$cpu_mon/temp1_input")
+
+# GPU (amdgpu)
+gpu_mon=$(hwmon amdgpu)
+gpu_temp=$(temp "$gpu_mon/temp1_input")
+gpu_junction=$(temp "$gpu_mon/temp2_input")
+gpu_mem_temp=$(temp "$gpu_mon/temp3_input")
+gpu_use=$(cat "$gpu_mon"/device/gpu_busy_percent 2>/dev/null || echo "?")
+
+# RAM
+while read -r key val _; do
+  case $key in
+    MemTotal:) mem_total=$val ;;
+    MemAvailable:) mem_avail=$val ;;
+  esac
+done < /proc/meminfo
+mem_used=$((mem_total - mem_avail))
+ram_use=$(( (100 * mem_used + mem_total / 2) / mem_total ))
+gib() { awk -v k="$1" 'BEGIN { printf "%.1f", k / 1048576 }'; }
+
+hot() { [[ $1 =~ ^[0-9]+$ && $1 -ge $2 ]]; }
+
+cpu_flag="" gpu_flag="" class="" alerts=""
+if hot "$cpu_temp" "$CPU_TEMP_ALERT"; then
+  cpu_flag=" $FIRE" class="active" alerts+="\n$FIRE CPU at ${cpu_temp}°C (alert ≥ ${CPU_TEMP_ALERT}°C)"
+fi
+if hot "$gpu_temp" "$GPU_TEMP_ALERT"; then
+  gpu_flag=" $FIRE" class="active" alerts+="\n$FIRE GPU at ${gpu_temp}°C (alert ≥ ${GPU_TEMP_ALERT}°C)"
+fi
+
+text=$(printf ' %s%% %s°%s  \U000f08ae %s%% %s°%s   %s%%' \
+  "$cpu_use" "$cpu_temp" "$cpu_flag" "$gpu_use" "$gpu_temp" "$gpu_flag" "$ram_use")
+tooltip="CPU: ${cpu_use}% · ${cpu_temp}°C\nGPU: ${gpu_use}% · ${gpu_temp}°C (junction ${gpu_junction}°C, VRAM ${gpu_mem_temp}°C)\nRAM: ${ram_use}% · $(gib $mem_used) / $(gib $mem_total) GiB${alerts}"
+
+printf '{"text":"%s","tooltip":"%s","class":"%s"}\n' "$text" "$tooltip" "$class"

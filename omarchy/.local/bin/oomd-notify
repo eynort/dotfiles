@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Desktop notification whenever systemd-oomd kills something in the user session.
+
+pretty_name() {
+  local unit="$1"
+  unit=$(printf "%b" "$unit")              # decode \x2d escapes
+  unit=${unit%.scope}; unit=${unit%.service}
+  unit=${unit#app-}; unit=${unit#Hyprland-}; unit=${unit#flatpak-}
+  unit=${unit%-*}                          # drop trailing id/hash
+  case "$unit" in
+    *terminal*) echo "una terminal (y todo lo que corría dentro)" ;;
+    *) echo "$unit" ;;
+  esac
+}
+
+journalctl --user -f -n0 -o cat | while IFS= read -r line; do
+  [[ "$line" == *"systemd-oomd killed"* ]] || continue
+  unit=${line%%:*}
+  count=$(grep -oE 'killed [0-9]+' <<<"$line" | grep -oE '[0-9]+')
+  notify-send -u critical -a "systemd-oomd" \
+    "Memoria agotada: se cerró $(pretty_name "$unit")" \
+    "RAM y swap pasaron del 90%. Se mataron ${count:-?} procesos de ${unit}."
+done

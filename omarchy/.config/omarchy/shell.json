@@ -1,0 +1,88 @@
+{
+  "bar": {
+    "centerAnchor": "omarchy.clock",
+    "id": "pc.bar",
+    "layout": {
+      "center": [
+        {
+          "id": "omarchy.indicators"
+        },
+        {
+          "birthYear": 0,
+          "format": "dddd HH:mm",
+          "formatAlt": "d MMMM 'W'ww yyyy",
+          "id": "omarchy.clock",
+          "lifeExpectancy": 30,
+          "verticalFormat": "HH\n—\nmm"
+        },
+        {
+          "id": "omarchy.keyboard-layout"
+        },
+        {
+          "id": "omarchy.weather"
+        },
+        {
+          "id": "omarchy.system-update"
+        }
+      ],
+      "left": [
+        {
+          "id": "omarchy.menu"
+        },
+        {
+          "id": "omarchy.workspaces"
+        }
+      ],
+      "right": [
+        {
+          "id": "omarchy.tray"
+        },
+        {
+          "exec": "~/.config/omarchy/bar/scripts/sysstats",
+          "id": "sysstats",
+          "interval": 2,
+          "onClick": "omarchy-launch-or-focus-tui btop",
+          "tooltip": "System stats",
+          "type": "command"
+        },
+        {
+          "id": "factory.dashboard"
+        },
+        {
+          "id": "omarchy.agents"
+        },
+        {
+          "id": "omarchy.bluetooth"
+        },
+        {
+          "id": "omarchy.network"
+        },
+        {
+          "exec": "~/.local/bin/g435-mode status",
+          "id": "g435-mode",
+          "interval": 1,
+          "onClick": "~/.local/bin/g435-mode toggle",
+          "tooltip": "G435 modo",
+          "type": "command"
+        },
+        {
+          "id": "omarchy.audio"
+        },
+        {
+          "id": "omarchy.monitor"
+        },
+        {
+          "id": "omarchy.power"
+        }
+      ]
+    },
+    "position": "top",
+    "transparent": false
+  },
+  "idle": {
+    "lock": 300,
+    "screensaver": 150
+  },
+  "plugins": [],
+  "version": 1
+}

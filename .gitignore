@@ -1,0 +1,8 @@
+# Backups Omarchy and editors leave next to config files
+*.bak
+*.bak.*
+
+# Omarchy repoints these at the active theme on every theme change
+omarchy/.config/nvim/lua/plugins/theme.lua
+omarchy/.config/btop/themes/
+.stow-packages

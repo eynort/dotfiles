@@ -1,0 +1,14 @@
+[Unit]
+Description=Chromium for Codex Chrome DevTools MCP
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/chromium --headless=new --remote-debugging-address=127.0.0.1 --remote-debugging-port=9222 --user-data-dir=/tmp/codex-chromium-profile --no-first-run --no-default-browser-check --disable-background-networking
+Restart=on-failure
+RestartSec=2
+KillMode=mixed
+
+[Install]
+WantedBy=default.target
