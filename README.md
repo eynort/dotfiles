@@ -1,8 +1,7 @@
 # dotfiles
 
-My personal Linux desktop config. The current setup runs on
-[Omarchy](https://omarchy.org/) (Arch + Hyprland). The previous vanilla Arch setup is
-still here, see [Legacy: vanilla Arch setup](#legacy-vanilla-arch-setup).
+My personal Linux desktop config, running on [Omarchy](https://omarchy.org/)
+(Arch + Hyprland).
 
 ## Repo layout
 
@@ -13,7 +12,6 @@ still here, see [Legacy: vanilla Arch setup](#legacy-vanilla-arch-setup).
 | `omarchy-install.sh` | Turns a fresh Omarchy install into this setup |
 | `omarchy-packages.txt` | Packages installed on top of stock Omarchy (`aur:` prefix for AUR) |
 | `sync.sh` | Pulls config changes Omarchy made back into the repo |
-| everything else | Legacy vanilla Arch setup |
 
 Only user overrides are tracked. Omarchy's own defaults in `/usr/share/omarchy` are
 never copied, so `omarchy update` keeps working as usual.
@@ -91,61 +89,3 @@ the theme files Omarchy repoints on every theme change (nvim `theme.lua`, btop
 `current.theme`), `factory.dashboard` (it links to another project), and `.bak.*`
 backups.
 
----
-
-## Legacy: vanilla Arch setup
-
-My setup before Omarchy: Hyprland on plain Arch.
-
-> Don't run `install.sh` on Omarchy. It's only for this vanilla setup and would
-> overwrite Omarchy's config.
-
-### Installation
-
-`install.sh` installs the needed packages with `pacman` and symlinks every config file
-in the repo root into your home directory. Review it before running:
-
-```bash
-./install.sh
-```
-
-### Components
-
-| Component | Tool | Config |
-| :--- | :--- | :--- |
-| Window manager | Hyprland | `hypr/hyprland.conf` |
-| Terminal | Kitty | `kitty/kitty.conf` |
-| Editor | Neovim (`lazy.nvim`) | `nvim/` |
-| Status bar | Waybar | `waybar/` |
-| File manager | Dolphin | `dolphinrc` |
-| Launcher | wofi (`SUPER` + `Space`) | `hypr/hyprland.conf` |
-| Logout menu | wlogout | `wlogout/` |
-| Wallpaper | hyprpaper | `hypr/hyprpaper.conf`, `wallpapers/` |
-
-### Keybindings
-
-| Keybinding | Action |
-| :--- | :--- |
-| `SUPER` + `T` | Open terminal (Kitty) |
-| `SUPER` + `Q` | Close active window |
-| `SUPER` + `M` | Exit Hyprland |
-| `SUPER` + `F` | Open file manager (Dolphin) |
-| `SUPER` + `V` | Toggle floating window |
-| `SUPER` + `Space` | Open application launcher (wofi) |
-| `SUPER` + `P` | Toggle pseudotiling |
-| `SUPER` + `J` | Toggle split |
-| `SUPER` + `SHIFT` + `S` | Take a screenshot of a region |
-| `SUPER` + `left`/`right`/`up`/`down` | Move focus |
-| `SUPER` + `1-9` | Switch to workspace 1-9 |
-| `SUPER` + `ALT` + `1-9` | Move active window to workspace 1-9 |
-
-### Theming
-
-Waybar and wlogout are styled with CSS (`waybar/theme.css`, `waybar/style.css`,
-`wlogout/style.css`). Window borders, shadows and blur are set in `hypr/hyprland.conf`.
-
-### Screenshots
-
-![Desktop](screenshots/desktop.png)
-![Representation](screenshots/representation.png)
-![Representation 2](screenshots/representation2.png)
